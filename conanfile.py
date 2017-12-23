@@ -321,7 +321,6 @@ class BoostConan(ConanFile):
 
                 command = line[0:first_space]
                 parts = command.split('.')
-                is_libline = False
                 if self.options.shared:
                     if len(parts) < 3:
                         continue
@@ -359,10 +358,16 @@ class BoostConan(ConanFile):
 
                 foundlibs[module] = modlibs
 
+        # apparently there are exceptions to the b2 build order
+        has_thread = link_modules.index('thread')
+        if has_thread >= 0:
+            link_modules.insert(0, link_modules.pop(has_thread))
+
         result = []
         for module in link_modules:
             result.extend(foundlibs[module])
         result.reverse()
+
         return result
 
     def _msvc_version(self):
