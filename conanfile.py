@@ -359,9 +359,11 @@ class BoostConan(ConanFile):
                 foundlibs[module] = modlibs
 
         # apparently there are exceptions to the b2 build order
-        has_thread = link_modules.index('thread')
-        if has_thread >= 0:
+        try:
+            has_thread = link_modules.index('thread')
             link_modules.insert(0, link_modules.pop(has_thread))
+        except:
+            pass
 
         result = []
         for module in link_modules:
