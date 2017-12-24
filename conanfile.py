@@ -121,7 +121,7 @@ class BoostConan(ConanFile):
         self.flags.extend(self.get_build_flags())
 
         # JOIN ALL FLAGS
-        full_command = self.resolve_full_command()
+        full_command = self.resolve_full_command(1)
         self.run("%s -o\"%s%sbuild_report.txt\"" % (full_command, self.build_folder, os.sep))
 
     def get_build_flags(self):
@@ -176,16 +176,17 @@ class BoostConan(ConanFile):
         flags.append(cxx_flags)
         return flags
 
-    def resolve_full_command(self):
+    def resolve_full_command(self, loglevel):
         command = "b2" if self.settings.os == "Windows" else "./b2"
         b2_flags = " ".join(self.flags)
         without_python = "--without-python" if not self.options.python else ""
-        full_command = "cd \"%s\" && %s %s -j%s --abbreviate-paths %s -d2" % (
+        full_command = "cd \"%s\" && %s %s -j%s --abbreviate-paths %s -d%d" % (
             self.FOLDER_NAME,
             command,
             b2_flags,
             tools.cpu_count(),
-            without_python)  # -d2 is to print more debug info and avoid travis timing out without output
+            without_python,
+            loglevel)  
         
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             full_command = "%s && %s" % (tools.vcvars_command(self.settings), full_command)
@@ -233,9 +234,9 @@ class BoostConan(ConanFile):
             tools.save(filename, tools.load(filename) + contents)
 
     def package(self):
-        command = self.resolve_full_command()
+        command = self.resolve_full_command(0)
 
-        self.run("{1} install --prefix=\"{2}\" --exec-prefix=\"{2}{0}bin\" --libdir=\"{2}{0}lib\" --includedir=\"{2}{0}include\"".format(os.sep, command, self.package_folder))
+        self.run("{1}i install --prefix=\"{2}\" --exec-prefix=\"{2}{0}bin\" --libdir=\"{2}{0}lib\" --includedir=\"{2}{0}include\"".format(os.sep, command, self.package_folder))
 
         if not self.options.header_only and self.settings.compiler == "Visual Studio" and \
             self.options.shared == "False":
