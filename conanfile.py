@@ -230,7 +230,7 @@ class BoostConan(ConanFile):
                     self.deps_cpp_info["bzip2"].include_paths[0].replace('\\', '/'),
                     self.deps_cpp_info["bzip2"].lib_paths[0].replace('\\', '/'))
 
-            filename = "%s/project-config.jam" % self.FOLDER_NAME
+            filename = "%s%sproject-config.jam" % (self.FOLDER_NAME, os.sep)
             tools.save(filename, tools.load(filename) + contents)
 
     def package(self):
